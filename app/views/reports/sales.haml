@@ -1,0 +1,33 @@
+= form_with url: sales_reports_path, method: :get, local: true, skip_enforcing_utf8: true, class: 'form-inline' do
+  %div.form-group
+    = label_tag 'From: '
+    = select_date time_for_select(@from_date), prefix: :from_date, start_year: 2015, end_year: Time.now.year, class: 'form-control'
+  %div.form-group
+    = label_tag 'To: '
+    = select_date time_for_select(@to_date), prefix: :to_date, start_year: 2015, end_year: Time.now.year, class: 'form-control'
+  = submit_tag 'Go', name: nil, class: 'btn btn-default'
+
+%div.table-responsive
+  %table.table.table-bordered.table-striped
+    %caption Products Sold
+    %thead
+      %tr
+        %th.col-xs-1 Quantity
+        %th.col-xs-4 Name
+        %th.col-xs-1 Date
+        %th.col-xs-1.text-right Total Revenue
+    %tbody
+      -@order_items.each do |item|
+        %tr
+          %td
+            -#TODO: move to scope
+            = item.source.order_items.sum(:quantity)
+          %td
+            = item.source.name
+          %td
+            = item.order.building_at
+          %td.text-right
+            -#TODO: move to scope
+            = number_to_currency(item.source.order_items.sum(:price))
+
+%div=paginate @order_items

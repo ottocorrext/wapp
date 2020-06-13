@@ -1,0 +1,31 @@
+= form_with url: coupons_reports_path, method: :get, local: true, skip_enforcing_utf8: true, class: 'form-inline' do
+  %div.form-group
+    = label_tag 'Coupons: '
+    = select_tag 'name', options_for_select([['Choose coupon', '']] + @coupon_names, include_blank: true, selected: params[:name]), class: 'form-control'
+  = submit_tag 'Go', name: nil, class: 'btn btn-default'
+
+-if @coupon
+  %h3= @coupon.name
+  %h4= "Number of Orders: #{@order_count}"
+  %h4= "Grand Total: #{number_to_currency @total_revenue}"
+
+  %div.table-responsive
+    %table.table.table-bordered.table-striped
+      %caption Orders
+      %thead
+        %tr
+          %th.col-xs-1 Order Number
+          %th.col-xs-4 Cust Email
+          %th.col-xs-1.text-right Total
+      %tbody
+        -@coupon.order_items.each do |item|
+          %tr
+            %td
+              = item.order.number
+            %td
+              = item.order.user.email
+            %td.text-right
+              = number_to_currency(item.order.total)
+
+-else
+  %h3= "No results found for coupon: #{params[:name]}" if params[:name]

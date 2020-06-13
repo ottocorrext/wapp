@@ -1,0 +1,31 @@
+= form_with url: orders_path, method: :get, local: true, skip_enforcing_utf8: true, class: 'form-inline' do
+  %div.form-group
+    = label_tag 'Search Field: '
+    = select_tag 'search_field', options_for_select([['Choose field', '']] + @search_fields, selected: params[:search_field]), class: 'form-control'
+  %div.form-group
+    = label_tag 'Search Term'
+    = text_field_tag :search_term, params[:search_term], class: 'form-control'
+  = submit_tag 'Go', name: nil, class: 'btn btn-default'
+
+%div.table-responsive
+  %table.table.table-bordered.table-striped
+    %caption Orders
+    %thead
+      %tr
+        %th.col-xs-1 Order Number
+        %th.col-xs-2 Current State
+        %th.col-xs-4 Cust Email
+        %th.col-xs-1.text-right Total
+    %tbody
+      -@orders.each do |order|
+        %tr
+          %td
+            = link_to order.number, order_path(order.number)
+          %td
+            = order.state.humanize
+          %td
+            = order.user.email
+          %td.text-right
+            = number_to_currency(order.total)
+
+%div=paginate @orders

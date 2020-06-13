@@ -22,4 +22,7 @@ class OrderItem < ApplicationRecord
   belongs_to :order
   belongs_to :source,
              polymorphic: true
+
+  paginates_per 10
+
 end

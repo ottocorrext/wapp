@@ -1,0 +1,131 @@
+%h3
+  = "Order: #{@order.number}"
+%h4
+  = "State: #{@order.state.humanize}"
+%h4
+  = "Total: #{number_to_currency(@order.total)}"
+- unless @order.canceled?
+  = form_with url: cancel_order_path(@order), method: :put, local: true, class: 'form-inline' do
+    = submit_tag 'Cancel', name: nil, class: 'btn btn-default'
+
+%div.table-responsive
+  %table.table.table-bordered.table-striped
+    %caption Customer Detail
+    %thead
+      %tr
+        %th Name
+        %th Email
+    %tbody
+      %tr
+        %td
+          = @order.user.name
+        %td
+          = @order.user.email
+%div.table-responsive
+  %table.table.table-bordered.table-striped
+    %caption Customer Address
+    %thead
+      %tr
+        %th.col-xs-2 Address
+        %th.col-xs-2 City
+        %th.col-xs-1 State
+        %th.col-xs-1 Zip
+    %tbody
+      %tr
+        %td
+          #{@order.address.address1} - #{@order.address.address2}
+        %td
+          = @order.address.city
+        %td
+          = @order.address.state
+        %td
+          = @order.address.zipcode
+
+%div.table-responsive
+  %table.table.table-bordered.table-striped
+    %caption Order Detail
+    %thead
+      %tr
+        %th.col-xs-1 Current State
+        %th.col-xs-1 Build Date
+        %th.col-xs-1 Arrive Date
+        %th.col-xs-1 Cancel Date
+    %tbody
+      %tr
+        %td
+          = @order.state.humanize
+        %td
+          = format_datetime(@order&.building_at)
+        %td
+          = format_datetime(@order&.arrived_at)
+        %td
+          = format_datetime(@order&.canceled_at)
+
+%div.table-responsive
+  %table.table.table-bordered.table-striped
+    %caption Order Items
+    %thead
+      %tr
+        %th.col-xs-1 Quantity
+        %th.col-xs-4 Product Name
+        %th.col-xs-1 State
+        %th.col-xs-1 SKU
+        %th.col-xs-1.text-right Cost
+        %th.col-xs-1.text-right MSRP
+        %th.col-xs-1.text-right Price
+    %tbody
+      -@order.order_items.each do |item|
+        %tr
+          %td
+            = item.quantity
+          -if item.source_type == 'Product'
+            %td
+              = item.source.name
+            %td
+              = item.state.humanize
+            %td
+              = item.source.sku
+            %td.text-right
+              = number_to_currency(item.source.cost)
+            %td.text-right
+              = number_to_currency(item.source.msrp)
+            %td.text-right
+              = number_to_currency(item.price)
+
+          -if item.source_type == 'Tax'
+            %td
+              = item.source.name
+            %td{colspan: 4}
+            %td.text-right
+              = number_to_currency(item.price)
+
+          -if item.source_type == 'Coupon'
+            %td
+              = "#{item.source.name} (Coupon)"
+            %td{colspan: 4}
+            %td.text-right
+              = number_to_currency(item.price)
+
+%div.table-responsive
+  %table.table.table-bordered.table-striped
+    %caption Payments
+    %thead
+      %tr
+        %th.col-xs-1 State
+        %th.col-xs-1 Complete Date
+        %th.col-xs-1 Refund Date
+        %th.col-xs-1 Payment Type
+        %th.col-xs-1.text-right Amount
+    %tbody
+      -@order.payments.each do |payment|
+        %tr
+          %td
+            = payment.state.humanize
+          %td
+            = format_datetime(payment&.completed_at)
+          %td
+            = format_datetime(payment&.refunded_at)
+          %td
+            = payment.payment_type
+          %td.text-right
+            = number_to_currency(payment.amount)
